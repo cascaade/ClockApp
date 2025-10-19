@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clock App</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&icon_names=alarm" />
+</head>
+
+<body>
+    <div id="navbar">
+        <span class="material-symbols-outlined">alarm</span>
+        <span>Time Clock</span>
+    </div>
+
+    <div id="content">
+        <div id="main-clock" class="widget">
+            <div class="widget-header">
+                <span class="date"></span>
+                <span class="timezone"></span>
+                <span class="numerical-date"></span>
+            </div>
+            <div class="widget-content">
+                <div class="time-font"><span class="twelve-hour-time"></span><span class="ms ms-font"></span></div>
+            </div>
+        </div>
+        <div id="military-clock" class="widget">
+            <div class="widget-header">
+                <span>24-Hour</span>
+                <span class="timezone"></span>
+            </div>
+            <div class="widget-content">
+                <div class="time-font"><span class="full-hour-time"></span></div>
+            </div>
+        </div>
+        <div id="utc-clock" class="widget">
+            <div class="widget-header">
+                <span>Coordinated Universal Time (UTC)</span>
+            </div>
+            <div class="widget-content">
+                <div class="time-font"><span class="utc-twelve-hour-time"></span> <span class="utc-am-pm"></span></div>
+            </div>
+        </div>
+        <div id="analog-clock" class="widget">
+            <div class="widget-header">
+                <span class="timezone"></span>
+            </div>
+            <div class="widget-content">
+                
+            </div>
+        </div>
+        <div id="utc-analog-clock" class="widget">
+            <div class="widget-header">
+                <span>Coordinated Universal Time (UTC)</span>
+            </div>
+            <div class="widget-content">
+                
+            </div>
+        </div>
+        <div id="unix-clock" class="widget">
+            <div class="widget-header">
+                <span>Unix Timestamp (s)</span>
+            </div>
+            <div class="widget-content">
+                <span class="time-font unix"></span>
+            </div>
+        </div>
+        <div id="sunrise-clock" class="widget">
+            <div class="widget-header">
+                <span>Sunset</span>
+                <span class="timezone"></span>
+            </div>
+            <div class="widget-content">
+                <span class="time-font sunrise loading">loading</span>
+            </div>
+        </div>
+        <div id="sunset-clock" class="widget">
+            <div class="widget-header">
+                <span>Sunset</span>
+                <span class="timezone"></span>
+            </div>
+            <div class="widget-content">
+                <span class="time-font sunset loading">loading</span>
+            </div>
+        </div>
+        <div id="solar-noon-clock" class="widget">
+            <div class="widget-header">
+                <span>Solar Noon</span>
+                <span class="timezone"></span>
+            </div>
+            <div class="widget-content">
+                <span class="time-font noon loading">loading</span>
+            </div>
+        </div>
+        <div id="day-length-clock" class="widget">
+            <div class="widget-header">
+                <span>Day Length</span>
+                <span class="timezone"></span>
+            </div>
+            <div class="widget-content">
+                <span class="time-font length loading">loading</span>
+            </div>
+        </div>
+        <div id="schedule-clock" class="widget">
+            <div class="widget-header">
+                <span>Bell Schedule</span>
+                <span class="timezone"></span>
+                <span class="numerical-date"></span>
+            </div>
+            <div class="widget-content">
+                
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+
+</html>
