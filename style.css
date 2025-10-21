@@ -8,6 +8,12 @@
     --level-2-gradient-1: hsl(203, 26%, 21%);
     --level-2-gradient-2: hsl(203, 26%, 30%);
 
+    --static-background: hsl(180, 20%, 19%); /* level 1 */
+    --static-border: hsl(180, 20%, 25%); /* level 1 */
+    --static-header: hsl(180, 20%, 21%); /* level 2 */
+    --static-gradient-1: hsl(180, 26%, 21%); /* level 2 */
+    --static-gradient-2: hsl(180, 26%, 30%); /* level 2 */
+
     --border-radius: 0.8rem;
     --inner-border-radius: 0.5rem;
     --standard-padding: 0.8rem;
@@ -62,11 +68,17 @@ body {
 .loading {
     background: linear-gradient(45deg, var(--level-2-gradient-1), var(--level-2-gradient-2), var(--level-2-gradient-1), var(--level-2-gradient-2));
     background-size: 300% 300%;
-    animation: gradientMove 2s linear infinite;
+    animation: gradientMove 1s linear infinite;
 
     border-radius: var(--inner-border-radius);
     color: #ffffff22;
     padding: 0.3rem 1rem;
+}
+
+.widget.static .loading {
+    background: linear-gradient(45deg, var(--static-gradient-1), var(--static-gradient-2), var(--static-gradient-1), var(--static-gradient-2));
+    background-size: 300% 300%;
+    animation: gradientMove 1s linear infinite;
 }
 
 @keyframes gradientMove {
@@ -100,6 +112,11 @@ body {
     background-color: var(--level-1-background);
 }
 
+.widget.static {
+    border: 1px solid var(--static-border);
+    background-color: var(--static-background);
+}
+
 .widget-header {
     background-color: var(--level-2-background);
     height: min-content;
@@ -108,6 +125,10 @@ body {
 
     display: flex;
     justify-content: space-between;
+}
+
+.widget.static .widget-header {
+    background-color: var(--static-header);
 }
 
 .widget-header:has(:only-child) {
@@ -124,7 +145,7 @@ body {
 }
 
 #main-clock {
-    grid-area: 1 / 1 / 3 / 3;
+    grid-area: 1 / 2 / 3 / 4;
 }
 
 #main-clock .time-font {
@@ -132,25 +153,43 @@ body {
 }
 
 #military-clock {
-    grid-area: 3 / 1 / 3 / 2;
+    grid-area: 3 / 2 / 3 / 3;
 }
 
 #utc-clock {
-    grid-area: 3 / 2 / 4 / 3;
+    grid-area: 3 / 3 / 4 / 4;
 }
 
 #analog-clock {
-    grid-area: 4 / 1 / 6 / 2;
+    grid-area: 4 / 2 / 6 / 3;
 }
 
 #utc-analog-clock {
-    grid-area: 4 / 2 / 6 / 3;
+    grid-area: 4 / 3 / 6 / 4;
+}
+
+#unix-clock {
+    grid-area: 1 / 1 / 2 / 2;
 }
 
 #schedule-clock {
     grid-area: 1 / 4 / 6 / 5;
 }
 
-#unix-clock {
-    grid-area: 1 / 3 / 2 / 4;
+#sunrise-clock {
+    grid-area: 4 / 1 / 5 / 2;
 }
+
+#sunset-clock {
+    grid-area: 5 / 1 / 6 / 2;
+}
+
+#solar-noon-clock {
+    grid-area: 3 / 1 / 4 / 2;
+}
+
+#day-length-clock {
+    grid-area: 2 / 1 / 3 / 2;
+}
+
+/* #schedule-clock {} */
