@@ -221,4 +221,4 @@ requestAnimationFrame(update);
         e.innerText = lengthString;
         e.classList.remove("loading");
     });
-});
+})();
