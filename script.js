@@ -1,4 +1,5 @@
 const mainClock = document.getElementById('main-clock');
+const scheduleBlockWidgetContent = document.querySelector('#schedule-clock .widget-content');
 
 const timeDisplays = document.querySelectorAll('.twelve-hour-time');
 const militaryTimeDisplays = document.querySelectorAll('.full-hour-time');
@@ -17,6 +18,96 @@ const dayLengthDisplays = document.querySelectorAll('.length');
 
 const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+
+const blocks = [
+    {
+        name: "Homeroom",
+        start: 9 * 60 + 15,
+        end: 9 * 60 + 55,
+    },
+    {
+        name: "Period 1",
+        start: 10 * 60 + 0,
+        end: 10 * 60 + 30,
+    },
+    {
+        name: "Period 2",
+        start: 10 * 60 + 35,
+        end: 11 * 60 + 5,
+    },
+    {
+        name: "Period 3",
+        start: 11 * 60 + 10,
+        end: 11 * 60 + 40,
+    },
+    {
+        name: "Lunch",
+        start: 11 * 60 + 43,
+        end: 12 * 60 + 47,
+    },
+    {
+        name: "Period 4",
+        start: 12 * 60 + 50,
+        end: (1 + 12) * 60 + 20,
+    },
+    {
+        name: "Period 5",
+        start: (1 + 12) * 60 + 25,
+        end: (1 + 12) * 60 + 55,
+    },
+    {
+        name: "Period 6",
+        start: (2 + 12) * 60 + 0,
+        end: (2 + 12) * 60 + 30,
+    }
+];
+
+function parseTime(mins) {
+    let h = Math.floor(mins / 60) % 12;
+    return `${h == 0 ? 12 : h}:${(mins % 60).toString().padEnd(2, '0')}`;
+}
+
+function createBlock(isPeriod, start, end, name) {
+    let len = end - start;
+    
+    const block = document.createElement('div');
+    const inner = document.createElement('div');
+    
+    block.classList.add('block');
+    block.setAttribute('style', `--flex-weight: ${len};`)
+    
+    inner.classList.add('block-inner');
+    
+    if (isPeriod) {
+        const times = document.createElement('div');
+        const _name = document.createElement('span');
+        const _start = document.createElement('span');
+        const _end = document.createElement('span');
+        const sep = document.createElement('span');
+        
+        times.classList.add('block-times');
+        block.classList.add('period-block');
+
+        _name.classList.add('block-name');
+        _name.innerText = name;
+        
+        _start.classList.add('block-start-time');
+        _start.innerText = parseTime(start);
+        
+        _end.classList.add('block-end-time');
+        _end.innerText = parseTime(end);
+
+        sep.innerText = ' - '
+        
+        times.append(_start, sep, _end);
+        inner.append(_name, times);
+        block.appendChild(inner);
+    } else {
+        block.classList.add('break-block');
+    }
+
+    scheduleBlockWidgetContent.appendChild(block);
+}
 
 function update() {
     requestAnimationFrame(update);
@@ -77,6 +168,19 @@ function update() {
     document.title = `${formattedTime12h} ${AmPm} • Clock App`;
 }
 
+for (let i = 0; i < blocks.length; i++) {
+    let {name, start, end} = blocks[i];
+    
+    if (i > 0) {
+        let lastEnd = blocks[i - 1].end;
+        if (lastEnd < start) {
+            createBlock(false, lastEnd, start, name);
+        }
+    }
+
+    createBlock(true, start, end, name);
+}
+
 requestAnimationFrame(update);
 
 
@@ -117,4 +221,4 @@ requestAnimationFrame(update);
         e.innerText = lengthString;
         e.classList.remove("loading");
     });
-})();
+});
