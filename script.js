@@ -1,6 +1,10 @@
+// elements that need specific selection
 const mainClock = document.getElementById('main-clock');
-const scheduleBlockWidgetContent = document.querySelector('#schedule-clock .widget-content');
+const scheduleWidgetContent = document.querySelector('#schedule-clock .widget-content');
+const scheduleOverlay = document.getElementById('schedule-overlay');
+const blocksContainer = document.getElementById('blocks-container');
 
+// all "displays": items with classes that allow it to be updated purely because of its class without extra code
 const timeDisplays = document.querySelectorAll('.twelve-hour-time');
 const militaryTimeDisplays = document.querySelectorAll('.full-hour-time');
 const utcTimeDisplays = document.querySelectorAll('.utc-twelve-hour-time');
@@ -16,9 +20,11 @@ const sunsetDisplays = document.querySelectorAll('.sunset');
 const solarNoonDisplays = document.querySelectorAll('.noon');
 const dayLengthDisplays = document.querySelectorAll('.length');
 
+// index days of the week & months of the year
 const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
+// blocks for the schedule widget, just a dummy schedule rn
 const blocks = [
     {
         name: "Homeroom",
@@ -62,11 +68,24 @@ const blocks = [
     }
 ];
 
+/**
+ * parse the time into a string; ex: 540 -> 9:00
+ * 
+ * uses 12h clock, not 24
+ * @param {number} mins 
+ * @returns parsed time as a string
+ */
 function parseTime(mins) {
-    let h = Math.floor(mins / 60) % 12;
-    return `${h == 0 ? 12 : h}:${(mins % 60).toString().padEnd(2, '0')}`;
+    return `${Math.floor(mins / 60 + 11) % 12 + 1}:${(mins % 60).toString().padEnd(2, '0')}`;
 }
 
+/**
+ * create a block in the schedule widget
+ * @param {boolean} isPeriod 
+ * @param {number} start 
+ * @param {number} end 
+ * @param {string} name 
+ */
 function createBlock(isPeriod, start, end, name) {
     let len = end - start;
     
@@ -102,24 +121,28 @@ function createBlock(isPeriod, start, end, name) {
         times.append(_start, sep, _end);
         inner.append(_name, times);
         block.appendChild(inner);
-    } else {
+    } else { // dont have to do all the stuff above
         block.classList.add('break-block');
     }
 
-    scheduleBlockWidgetContent.appendChild(block);
+    blocksContainer.appendChild(block);
 }
 
+/**
+ * update the dashboard
+ */
 function update() {
     requestAnimationFrame(update);
 
     let now = new Date();
 
+    // get and format a bunch of data from the date obj
     let formattedMinutes = `${now.getMinutes().toString().padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')}`;
     let formattedTime24h = `${now.getHours()}:${formattedMinutes}`;
-    let formattedTime12h = `${now.getHours() % 12}:${formattedMinutes}`;
+    let formattedTime12h = `${(now.getHours() + 11) % 12 + 1}:${formattedMinutes}`;
     let formattedUTCMinutes = `${now.getUTCMinutes().toString().padStart(2, '0')}:${now.getUTCSeconds().toString().padStart(2, '0')}`;
     let formattedUTCTime24h = `${now.getUTCHours()}:${formattedUTCMinutes}`;
-    let formattedUTCTime12h = `${now.getUTCHours() % 12}:${formattedUTCMinutes}`;
+    let formattedUTCTime12h = `${(now.getUTCHours() + 11) % 12 + 1}:${formattedUTCMinutes}`;
     let AmPm = now.getHours() < 12 ? "AM" : "PM";
     let UTCAmPm = now.getUTCHours() < 12 ? "AM" : "PM";
     let textDay = days[now.getDay()];
@@ -166,6 +189,32 @@ function update() {
     });
     
     document.title = `${formattedTime12h} ${AmPm} • Clock App`;
+
+    if (blocks.length < 1) return;
+
+    let scheduleStart = blocks[0].start;
+    let scheduleEnd = blocks[blocks.length - 1].end;
+    
+    // parent box height
+    let boxHeight = scheduleWidgetContent.getBoundingClientRect().height;
+    let boxPadding = parseFloat(getComputedStyle(scheduleWidgetContent).paddingTop);
+    let percentPadding = boxPadding / boxHeight; // percent of parent box height taken up by one side of padding (0-1)
+
+    // get time since 12:00AM in minutes
+    let timeInMinutes = now.getHours() * 60 + now.getMinutes() + now.getSeconds() / 60 + now.getMilliseconds() / (60 * 1000);
+    let timeSinceScheduleStart = timeInMinutes - scheduleStart;
+    let percentThroughSchedule = timeSinceScheduleStart / (scheduleEnd - scheduleStart); // percent way through the schedule (0-1)
+    
+    // calc the 
+    let overlayTotalPercent = ((1 - percentPadding * 2) * percentThroughSchedule * 100) + percentPadding * 100;
+
+    if (overlayTotalPercent < 0) {
+        scheduleOverlay.style.display = "none";
+    } else {
+        scheduleOverlay.style.display = "";
+    }
+
+    scheduleOverlay.style.height = overlayTotalPercent + "%";
 }
 
 for (let i = 0; i < blocks.length; i++) {
