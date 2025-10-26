@@ -27,6 +27,9 @@
     --font-size: 1.2rem;
     --font-family: 'Helvetica', system-ui, sans-serif;
     --font-color: hsl(203, 26%, 95%);
+
+    --hand-color: hsl(203, 26%, 70%);
+    --second-hand-color: hsl(0, 26%, 70%);
     
     background-color: var(--background-color);
     font: var(--font-size) var(--font-family); 
@@ -66,7 +69,7 @@ body {
     padding: 2rem;
 
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(5, 1fr);
     grid-template-rows: repeat(5, 1fr);
     gap: 0.5rem;
 }
@@ -170,6 +173,21 @@ body {
     grid-area: 4 / 2 / 6 / 3;
 }
 
+.analog-svg {
+    --color: white;
+    height: 100%;
+    aspect-ratio: 1;
+}
+
+.hand {
+    stroke: var(--hand-color);
+    stroke-linecap: round;
+}
+
+.hand.second {
+    stroke: var(--second-hand-color);
+}
+
 #utc-analog-clock {
     grid-area: 4 / 3 / 6 / 4;
 }
@@ -217,7 +235,7 @@ body {
 }
 
 #schedule-overlay-label {
-    font-size: 0.8rem;
+    font-size: 0.6rem;
     text-transform: uppercase;
     font-weight: 600;
 
@@ -229,9 +247,9 @@ body {
     color: var(--schedule-bar-text-color);
     background-color: var(--level-2-background);
 
-    padding: 0.1em 0.3em;
+    padding: 0.1em 0.5em;
     border: 2px solid var(--schedule-bar-color);
-    border-radius: 0.3em;
+    border-radius: 1em;
 }
 
 #blocks-container {

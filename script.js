@@ -19,6 +19,11 @@ const sunriseDisplays = document.querySelectorAll('.sunrise');
 const sunsetDisplays = document.querySelectorAll('.sunset');
 const solarNoonDisplays = document.querySelectorAll('.noon');
 const dayLengthDisplays = document.querySelectorAll('.length');
+const blockRemainingTimeDisplays = document.querySelectorAll('.block-remaining');
+const scheduleRemainingTimeDisplays = document.querySelectorAll('.schedule-remaining');
+const analogSvgDisplays = document.querySelectorAll('.analog-svg');
+const localAnalogSvgDisplays = document.querySelectorAll('.local-analog-svg');
+const utcAnalogSvgDisplays = document.querySelectorAll('.utc-analog-svg');
 
 // index days of the week & months of the year
 const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
@@ -69,14 +74,35 @@ const blocks = [
 ];
 
 /**
- * parse the time into a string; ex: 540 -> 9:00
+ * parse the time into a string with h:mm; ex: 540 -> 9:00
  * 
  * uses 12h clock, not 24
  * @param {number} mins 
  * @returns parsed time as a string
  */
-function parseTime(mins) {
-    return `${Math.floor(mins / 60 + 11) % 12 + 1}:${(mins % 60).toString().padEnd(2, '0')}`;
+function parseTimeToHM(mins) {
+    return `${Math.floor(mins / 60 + 11) % 12 + 1}:${(mins % 60).toString().padStart(2, '0')}`;
+}
+
+/**
+ * parse the time into a string with mm:ss; ex: 5 -> 5:00
+ * 
+ * @param {number} mins 
+ * @returns parsed time as a string
+ */
+function parseTimeToMS(mins) {
+    return `${Math.floor(mins % 60)}:${Math.floor(mins % 1 * 60).toString().padStart(2, '0')}`;
+}
+
+/**
+ * parse the time into a string with h:mm:ss; ex: 540.00 -> 9:00:00
+ * 
+ * @param {number} mins 
+ * @returns parsed time as a string
+ */
+function parseTimeToHMS(mins) {
+    mins = Math.max(mins, 0);
+    return `${Math.floor(mins / 60 / 60)}:${Math.floor(mins % 60).toString().padStart(2, '0')}:${Math.floor(mins % 1 * 60).toString().padStart(2, '0')}`;
 }
 
 /**
@@ -111,10 +137,10 @@ function createBlock(isPeriod, start, end, name) {
         _name.innerText = name;
         
         _start.classList.add('block-start-time');
-        _start.innerText = parseTime(start);
+        _start.innerText = parseTimeToHM(start);
         
         _end.classList.add('block-end-time');
-        _end.innerText = parseTime(end);
+        _end.innerText = parseTimeToHM(end);
 
         sep.innerText = ' - '
         
@@ -126,6 +152,36 @@ function createBlock(isPeriod, start, end, name) {
     }
 
     blocksContainer.appendChild(block);
+}
+
+/**
+ * update an analog clock
+ * @param {HTMLDivElement} clock the analog clock to update
+ * @param {number} time the time in seconds
+ */
+function updateAnalog(clock, time) {
+    let hourHand = clock.querySelector('.hand.hour');
+    let minuteHand = clock.querySelector('.hand.minute');
+    let secondHand = clock.querySelector('.hand.second');
+
+    let hourHandLength = 60;
+    let minuteHandLength = 90;
+    let secondHandLength = 100;
+
+    let hours = (time / (60 * 60) + 11) % 12 + 1;
+    let minutes = time / 60;
+    let seconds = time % 60;
+
+    let hourAngle = (hours / 12) * Math.PI * 2 - Math.PI / 2;
+    let minutesAngle = (minutes / 60) * Math.PI * 2 - Math.PI / 2;
+    let secondsAngle = (seconds / 60) * Math.PI * 2 - Math.PI / 2;
+
+    hourHand.setAttribute('x2', Math.cos(hourAngle) * hourHandLength + 150);
+    hourHand.setAttribute('y2', Math.sin(hourAngle) * hourHandLength + 150);
+    minuteHand.setAttribute('x2', Math.cos(minutesAngle) * minuteHandLength + 150);
+    minuteHand.setAttribute('y2', Math.sin(minutesAngle) * minuteHandLength + 150);
+    secondHand.setAttribute('x2', Math.cos(secondsAngle) * secondHandLength + 150);
+    secondHand.setAttribute('y2', Math.sin(secondsAngle) * secondHandLength + 150);
 }
 
 /**
@@ -169,7 +225,7 @@ function update() {
     });
 
     numericalDateDisplays.forEach((e) => {
-        e.innerText = `${now.getMonth()}/${now.getDate()}/${now.getFullYear()}`;
+        e.innerText = `${now.getMonth() + 1}/${now.getDate()}/${now.getFullYear()}`;
     });
 
     timezoneDisplays.forEach((e) => {
@@ -187,11 +243,19 @@ function update() {
     unixDisplays.forEach((e) => {
         e.innerText = Math.floor(Date.now() / 1000);
     });
+
+    localAnalogSvgDisplays.forEach(e => {
+        updateAnalog(e, now.getHours() * 60 * 60 + now.getMinutes() * 60 + now.getSeconds() + now.getMilliseconds() / 1000);
+    });
+
+    utcAnalogSvgDisplays.forEach(e => {
+        updateAnalog(e, now.getUTCHours() * 60 * 60 + now.getUTCMinutes() * 60 + now.getUTCSeconds() + now.getUTCMilliseconds() / 1000);
+    });
     
     document.title = `${formattedTime12h} ${AmPm} • Clock App`;
-
+    
     if (blocks.length < 1) return;
-
+    
     let scheduleStart = blocks[0].start;
     let scheduleEnd = blocks[blocks.length - 1].end;
     
@@ -199,7 +263,7 @@ function update() {
     let boxHeight = scheduleWidgetContent.getBoundingClientRect().height;
     let boxPadding = parseFloat(getComputedStyle(scheduleWidgetContent).paddingTop);
     let percentPadding = boxPadding / boxHeight; // percent of parent box height taken up by one side of padding (0-1)
-
+    
     // get time since 12:00AM in minutes
     let timeInMinutes = now.getHours() * 60 + now.getMinutes() + now.getSeconds() / 60 + now.getMilliseconds() / (60 * 1000);
     let timeSinceScheduleStart = timeInMinutes - scheduleStart;
@@ -207,14 +271,37 @@ function update() {
     
     // calc the 
     let overlayTotalPercent = ((1 - percentPadding * 2) * percentThroughSchedule * 100) + percentPadding * 100;
-
+    
     if (overlayTotalPercent < 0) {
         scheduleOverlay.style.display = "none";
     } else {
         scheduleOverlay.style.display = "";
     }
-
+    
     scheduleOverlay.style.height = overlayTotalPercent + "%";
+    
+    blockRemainingTimeDisplays.forEach((e) => {
+        let endTime = Math.max(timeInMinutes, scheduleEnd);
+
+        for (const block of blocks) {
+            if (block.end < timeInMinutes) continue;
+            if (block.start > endTime) continue;
+
+            if (block.start > timeInMinutes) {
+                endTime = block.start;
+            }
+
+            if (block.end > timeInMinutes && block.end < endTime) {
+                endTime = block.end;
+            }
+        }
+
+        e.innerText = parseTimeToMS(endTime - timeInMinutes);
+    });
+
+    scheduleRemainingTimeDisplays.forEach((e) => {
+        e.innerText = parseTimeToHMS(scheduleEnd - timeInMinutes);
+    });
 }
 
 for (let i = 0; i < blocks.length; i++) {
@@ -229,6 +316,24 @@ for (let i = 0; i < blocks.length; i++) {
 
     createBlock(true, start, end, name);
 }
+
+analogSvgDisplays.forEach(e => {
+    const marksGroup = e.querySelector('.marks');
+    const totalMarks = 12 * 5; // use 60 for minute ticks
+    const step = 360 / totalMarks; // 30° for 12, 6° for 60
+
+    for (let i = 0; i < totalMarks; i++) {
+        const tick = document.createElementNS('http://www.w3.org/2000/svg', 'use');
+        tick.setAttribute('transform', `rotate(${i * step},150,150)`);
+        marksGroup.appendChild(tick);
+
+        if (i % 5 == 0) {
+            tick.setAttribute('href', '#large-tick');
+        } else {
+            tick.setAttribute('href', '#small-tick');
+        }
+    }
+})
 
 requestAnimationFrame(update);
 

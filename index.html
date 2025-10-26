@@ -48,7 +48,22 @@
                 <span class="timezone"></span>
             </div>
             <div class="widget-content">
+                <svg height="0" viewBox="0 0 300 300" xmlns="http://www.w3.org/2000/svg" class="analog-svg local-analog-svg">
+                    <circle cx="150" cy="150" r="148" stroke="var(--level-2-border)" stroke-width="4" fill="none" />
                 
+                    <defs>
+                        <line id="large-tick" x1="150" y1="15" x2="150" y2="35" stroke="var(--level-2-background)" stroke-width="3" stroke-linecap="round" />
+                        <line id="small-tick" x1="150" y1="15" x2="150" y2="25" stroke="var(--level-2-background)" stroke-width="2" stroke-linecap="round" />
+                    </defs>
+
+                    <g class="marks"></g>
+                
+                    <line class="hand hour"   x1="150" y1="150" x2="150" y2="90" stroke-width="6" />
+                    <line class="hand minute" x1="150" y1="150" x2="150" y2="60" stroke-width="6" />
+                    <line class="hand second" x1="150" y1="150" x2="150" y2="50" stroke-width="3" />
+                
+                    <circle cx="150" cy="150" r="8" fill="var(--color)" />
+                </svg>
             </div>
         </div>
         <div id="utc-analog-clock" class="widget">
@@ -56,7 +71,22 @@
                 <span>Coordinated Universal Time (UTC)</span>
             </div>
             <div class="widget-content">
+                <svg height="0" viewBox="0 0 300 300" xmlns="http://www.w3.org/2000/svg" class="analog-svg utc-analog-svg">
+                    <circle cx="150" cy="150" r="148" stroke="var(--level-2-border)" stroke-width="4" fill="none" />
                 
+                    <defs>
+                        <line id="large-tick" x1="150" y1="15" x2="150" y2="35" stroke="var(--level-2-background)" stroke-width="3" stroke-linecap="round" />
+                        <line id="small-tick" x1="150" y1="15" x2="150" y2="25" stroke="var(--level-2-background)" stroke-width="2" stroke-linecap="round" />
+                    </defs>
+
+                    <g class="marks"></g>
+                
+                    <line class="hand hour"   x1="150" y1="150" x2="150" y2="90" stroke-width="6" />
+                    <line class="hand minute" x1="150" y1="150" x2="150" y2="60" stroke-width="6" />
+                    <line class="hand second" x1="150" y1="150" x2="150" y2="50" stroke-width="3" />
+                
+                    <circle cx="150" cy="150" r="8" fill="var(--color)" />
+                </svg>
             </div>
         </div>
         <div id="unix-clock" class="widget">
@@ -114,6 +144,32 @@
                     <span id="schedule-overlay-label">now</span>
                 </div>
                 <div id="blocks-container"></div>
+            </div>
+        </div>
+        <div id="school-counter-clock" class="widget">
+            <div class="widget-header">
+                <span>School Calendar</span>
+                <span class="numerical-date"></span>
+            </div>
+            <div class="widget-content">
+            </div>
+        </div>
+        <div id="block-counter-clock" class="widget">
+            <div class="widget-header">
+                <span>Until End of Block</span>
+                <span class="timezone"></span>
+            </div>
+            <div class="widget-content">
+                <span class="time-font block-remaining"></span>
+            </div>
+        </div>
+        <div id="schedule-counter-clock" class="widget">
+            <div class="widget-header">
+                <span>Until End of Schedule</span>
+                <span class="timezone"></span>
+            </div>
+            <div class="widget-content">
+                <span class="time-font schedule-remaining"></span>
             </div>
         </div>
     </div>
