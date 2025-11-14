@@ -314,3 +314,62 @@ body {
     font-size: 0.9em;
     opacity: 0.8;
 }
+
+#school-counter-clock {
+    grid-area: 1 / 5 / 3 / 6;
+}
+
+#school-counter-clock .widget-content {
+    display: block;
+    box-sizing: content-box;
+}
+
+#data-widget .widget-content {
+    display: flex;
+    gap: 0.5em;
+}
+
+#data-widget button {
+    padding: 0.5em 0.8em;
+    background-color: var(--static-gradient-1);
+    border: 1px solid var(--static-gradient-2);
+    color: inherit;
+    font: inherit;
+    font-size: 0.9em;
+    border-radius: var(--inner-border-radius);
+    cursor: pointer;
+}
+
+.days-off {
+    width: 100%;
+    height: 0;
+    display: flex;
+    flex-direction: column;
+    font-size: 0.8em;
+    gap: 0.3em;
+}
+
+.day-off {
+    background-color: var(--static-gradient-1);
+    border: 1px solid var(--static-gradient-2);
+    width: 100%;
+    padding: 0.2em 0.4em;
+    box-sizing: border-box;
+    border-radius: var(--inner-border-radius);
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    column-gap: 0.5em;
+}
+
+.t-day-off {
+    background: linear-gradient(45deg, var(--static-gradient-1), var(--static-gradient-2), var(--static-gradient-1), var(--static-gradient-2));
+    background-size: 300% 300%;
+    animation: gradientMove 2s linear infinite;
+}
+
+.day-off-date {
+    opacity: 0.8;
+    font-size: 0.8em;
+}

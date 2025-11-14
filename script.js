@@ -3,6 +3,8 @@ const mainClock = document.getElementById('main-clock');
 const scheduleWidgetContent = document.querySelector('#schedule-clock .widget-content');
 const scheduleOverlay = document.getElementById('schedule-overlay');
 const blocksContainer = document.getElementById('blocks-container');
+const setButton = document.getElementById('set-button');
+const getButton = document.getElementById('get-button');
 
 // all "displays": items with classes that allow it to be updated purely because of its class without extra code
 const timeDisplays = document.querySelectorAll('.twelve-hour-time');
@@ -24,13 +26,14 @@ const scheduleRemainingTimeDisplays = document.querySelectorAll('.schedule-remai
 const analogSvgDisplays = document.querySelectorAll('.analog-svg');
 const localAnalogSvgDisplays = document.querySelectorAll('.local-analog-svg');
 const utcAnalogSvgDisplays = document.querySelectorAll('.utc-analog-svg');
+const daysOffDisplays = document.querySelectorAll('.days-off');
 
 // index days of the week & months of the year
 const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
-// blocks for the schedule widget, just a dummy schedule rn
-const blocks = [
+// blocks for the schedule widget
+let blocks = [
     {
         name: "Homeroom",
         start: 9 * 60 + 15,
@@ -73,6 +76,13 @@ const blocks = [
     }
 ];
 
+const ENUM = {
+    DAYOFF: 't-day-off',
+    HALFDAY: 't-half-day',
+}
+
+let daysOff = [];
+
 /**
  * parse the time into a string with h:mm; ex: 540 -> 9:00
  * 
@@ -102,7 +112,7 @@ function parseTimeToMS(mins) {
  */
 function parseTimeToHMS(mins) {
     mins = Math.max(mins, 0);
-    return `${Math.floor(mins / 60 / 60)}:${Math.floor(mins % 60).toString().padStart(2, '0')}:${Math.floor(mins % 1 * 60).toString().padStart(2, '0')}`;
+    return `${Math.floor(mins / 60)}:${Math.floor(mins % 60).toString().padStart(2, '0')}:${Math.floor(mins % 1 * 60).toString().padStart(2, '0')}`;
 }
 
 /**
@@ -154,6 +164,24 @@ function createBlock(isPeriod, start, end, name) {
     blocksContainer.appendChild(block);
 }
 
+function createDayOff(d, c) {
+    const day = document.createElement('div');
+    day.innerText = d.name;
+    day.classList.add('day-off');
+    day.classList.add(d.type);
+
+    const date = document.createElement('span');
+    date.classList.add('day-off-date');
+    
+    if (d.date)
+        date.innerText = d.date.toLocaleDateString();
+    else if (d.startDate && d.endDate)
+        date.innerText = d.startDate.toLocaleDateString() + ' - ' + d.endDate.toLocaleDateString();
+
+    day.appendChild(date);
+    c.appendChild(day);
+}
+
 /**
  * update an analog clock
  * @param {HTMLDivElement} clock the analog clock to update
@@ -168,6 +196,10 @@ function updateAnalog(clock, time) {
     let minuteHandLength = 90;
     let secondHandLength = 100;
 
+    let hourHandExtLength = hourHandLength * 1/3;
+    let minuteHandExtLength = minuteHandLength * 1/3;
+    let secondHandExtLength = secondHandLength * 1/3;
+
     let hours = (time / (60 * 60) + 11) % 12 + 1;
     let minutes = time / 60;
     let seconds = time % 60;
@@ -176,10 +208,16 @@ function updateAnalog(clock, time) {
     let minutesAngle = (minutes / 60) * Math.PI * 2 - Math.PI / 2;
     let secondsAngle = (seconds / 60) * Math.PI * 2 - Math.PI / 2;
 
+    hourHand.setAttribute('x1', Math.cos(hourAngle - Math.PI) * hourHandExtLength + 150);
+    hourHand.setAttribute('y1', Math.sin(hourAngle - Math.PI) * hourHandExtLength + 150);
     hourHand.setAttribute('x2', Math.cos(hourAngle) * hourHandLength + 150);
     hourHand.setAttribute('y2', Math.sin(hourAngle) * hourHandLength + 150);
+    minuteHand.setAttribute('x1', Math.cos(minutesAngle - Math.PI) * minuteHandExtLength + 150);
+    minuteHand.setAttribute('y1', Math.sin(minutesAngle - Math.PI) * minuteHandExtLength + 150);
     minuteHand.setAttribute('x2', Math.cos(minutesAngle) * minuteHandLength + 150);
     minuteHand.setAttribute('y2', Math.sin(minutesAngle) * minuteHandLength + 150);
+    secondHand.setAttribute('x1', Math.cos(secondsAngle - Math.PI) * secondHandExtLength + 150);
+    secondHand.setAttribute('y1', Math.sin(secondsAngle - Math.PI) * secondHandExtLength + 150);
     secondHand.setAttribute('x2', Math.cos(secondsAngle) * secondHandLength + 150);
     secondHand.setAttribute('y2', Math.sin(secondsAngle) * secondHandLength + 150);
 }
@@ -290,18 +328,61 @@ function update() {
             if (block.start > timeInMinutes) {
                 endTime = block.start;
             }
-
+            
             if (block.end > timeInMinutes && block.end < endTime) {
                 endTime = block.end;
             }
         }
-
+        
         e.innerText = parseTimeToMS(endTime - timeInMinutes);
     });
-
+    
     scheduleRemainingTimeDisplays.forEach((e) => {
         e.innerText = parseTimeToHMS(scheduleEnd - timeInMinutes);
     });
+}
+
+function getCookie(name) { // chatgpt; should work
+    const match = document.cookie.match(
+        new RegExp('(?:^|; )' + name.replace(/([.$?*|{}()[\]\\/+^])/g, '\\$1') + '=([^;]*)')
+    );
+    return match ? decodeURIComponent(match[1]) : null;
+}
+
+let rawJsonScheduleData = getCookie("json");
+
+// apply from cookie if readable
+if (document.cookie && rawJsonScheduleData) {
+    try {
+        let data = JSON.parse(rawJsonScheduleData);
+
+        for (const block of data.blocks) {
+            if (typeof(block.name) != "string") throw new Error("Couldn't access critical attribute.");
+            if (typeof(block.start) != "number") throw new Error("Couldn't access critical attribute.");
+            if (typeof(block.end) != "number") throw new Error("Couldn't access critical attribute.");
+        }
+
+        for (const dayOff of data.days_off) {
+            if (typeof(dayOff.type) != "string") throw new Error("Couldn't access critical attribute.");
+            if (typeof(dayOff.name) != "string") throw new Error("Couldn't access critical attribute.");
+
+            if (dayOff.date) {
+                dayOff.date = new Date(dayOff.date);
+            } else if (dayOff.startDate && dayOff.endDate) {
+                dayOff.startDate = new Date(dayOff.startDate);
+                dayOff.endDate = new Date(dayOff.endDate);
+            } else {
+                throw new Error("Couldn't access critical attribute.");
+            }
+        }
+
+        blocks = data.blocks;
+        daysOff = data.days_off;
+
+        console.log(blocks, daysOff);
+    } catch (e) {
+        alert("Invalid JSON in cookie:\n" + e);
+    }
 }
 
 for (let i = 0; i < blocks.length; i++) {
@@ -316,6 +397,12 @@ for (let i = 0; i < blocks.length; i++) {
 
     createBlock(true, start, end, name);
 }
+
+daysOffDisplays.forEach(e => {
+    daysOff.forEach(d => {
+        createDayOff(d, e);
+    });
+});
 
 analogSvgDisplays.forEach(e => {
     const marksGroup = e.querySelector('.marks');
@@ -333,9 +420,29 @@ analogSvgDisplays.forEach(e => {
             tick.setAttribute('href', '#small-tick');
         }
     }
-})
+});
 
 requestAnimationFrame(update);
+
+
+setButton.addEventListener("click", () => {
+    const response = prompt("JSON");
+
+    if (response) {
+        document.cookie = "json=" + encodeURIComponent(response) + ";";
+        document.location.reload();
+    }
+});
+
+getButton.addEventListener("click", () => {
+    const json = {
+        blocks,
+        days_off: daysOff,
+        timestamp: Date.now()
+    };
+
+    alert(JSON.stringify(json));
+});
 
 
 (async () => {

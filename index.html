@@ -146,12 +146,15 @@
                 <div id="blocks-container"></div>
             </div>
         </div>
-        <div id="school-counter-clock" class="widget">
+        <div id="school-counter-clock" class="widget static">
             <div class="widget-header">
                 <span>School Calendar</span>
                 <span class="numerical-date"></span>
             </div>
             <div class="widget-content">
+                <div class="days-off-container">
+                    <div class="days-off"></div>
+                </div>
             </div>
         </div>
         <div id="block-counter-clock" class="widget">
@@ -170,6 +173,15 @@
             </div>
             <div class="widget-content">
                 <span class="time-font schedule-remaining"></span>
+            </div>
+        </div>
+        <div id="data-widget" class="widget static">
+            <div class="widget-header">
+                <span>Data Manager</span>
+            </div>
+            <div class="widget-content">
+                <button id="set-button">Set Data</button>
+                <button id="get-button">Get Data</button>
             </div>
         </div>
     </div>
